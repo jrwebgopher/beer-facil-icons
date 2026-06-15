@@ -112,14 +112,15 @@ const categories = {};
 });
 
 // ── Gera CSS ─────────────────────────────────────────────────
-const allIcons = [...svgData, ...pngData];
-let iconCSS = "\n/* --- Ícones --- */\n";
-allIcons.forEach(({ id, type }) => {
-  if (type === "svg") {
-    iconCSS += `.${id.padEnd(24)}{ --bf-mask: url("${BASE_URL}/svgs/${id}.svg"); }\n`;
-  } else {
-    iconCSS += `.${id.padEnd(24)}{ --bf-png: url("${BASE_URL}/imgs/${id}.png"); }\n`;
-  }
+let iconCSS = "\n/* --- Ícones SVG --- */\n";
+svgData.forEach(({ id }) => {
+  iconCSS += `.${id.padEnd(24)}{ --bf-mask: url("${BASE_URL}/svgs/${id}.svg"); }\n`;
+});
+
+iconCSS += "\n/* --- Ícones PNG (cores originais, sem máscara) --- */\n";
+pngData.forEach(({ id }) => {
+  iconCSS += `.${id} { background-image: url("${BASE_URL}/imgs/${id}.png"); background-size: contain; background-repeat: no-repeat; background-position: center; }\n`;
+  iconCSS += `.${id}::before { display: none; }\n`;
 });
 
 const css = `/*!
@@ -258,13 +259,13 @@ const demo = `<!DOCTYPE html>
 </head>
 <body>
 <header class="hero">
-  <h1>🍺 Beer<span> Fácil</span> Icons</h1>
-  <p>Biblioteca de ícones Beer Fácil</p>
+  <h1>🍺 Beer<span>Fácil</span> Icons</h1>
+  <p>Biblioteca de ícones SVG + PNG. Adicione novos no Cloudflare — todos os projetos atualizam automaticamente.</p>
   <span class="badge">v1.0.0 · ${allFiles.length} ícones</span>
 </header>
 <div class="install">
   <div class="install-box">
-    <div class="install-label">Incluir no projeto</div>
+    <div class="install-label">Incluir no projeto — só esta linha</div>
     <code class="install-code">&lt;link rel="stylesheet" href="${BASE_URL}/bf-icons.css"&gt;</code>
   </div>
 </div>
