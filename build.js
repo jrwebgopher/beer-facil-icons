@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /**
  * Beer Fácil Icons — Build Script
- * Suporta SVG (máscara CSS) e PNG (background-image colorido)
- * SVGs exportados do Figma com cores fixas são normalizados automaticamente.
+ * Cada ícone SVG vira um arquivo individual em dist/svgs/
+ * PNG vai para dist/imgs/
+ * CSS usa url("svgs/bf-note.svg") — sem sprite, sem display:none
  */
 
 const fs   = require("fs");
@@ -14,12 +15,13 @@ const BASE_URL = process.argv.includes("--base-url")
 
 const SVGS_DIR  = path.join(__dirname, "src/svgs");
 const DIST_DIR  = path.join(__dirname, "dist");
-const IMGS_DIR  = path.join(DIST_DIR, "imgs");
-const SPRITE    = path.join(DIST_DIR, "bf-icons.svg");
+const DIST_SVGS = path.join(DIST_DIR, "svgs");
+const DIST_IMGS = path.join(DIST_DIR, "imgs");
 const CSS_OUT   = path.join(DIST_DIR, "bf-icons.css");
 
-if (!fs.existsSync(DIST_DIR)) fs.mkdirSync(DIST_DIR, { recursive: true });
-if (!fs.existsSync(IMGS_DIR)) fs.mkdirSync(IMGS_DIR, { recursive: true });
+[DIST_DIR, DIST_SVGS, DIST_IMGS].forEach(d => {
+  if (!fs.existsSync(d)) fs.mkdirSync(d, { recursive: true });
+});
 
 // ── Lê todos os arquivos ─────────────────────────────────────
 const allFiles = fs.readdirSync(SVGS_DIR)
@@ -34,81 +36,70 @@ if (allFiles.length === 0) {
 const svgFiles = allFiles.filter(f => f.endsWith(".svg"));
 const pngFiles = allFiles.filter(f => f.endsWith(".png"));
 
-// ── Normaliza SVG para currentColor ──────────────────────────
-// Substitui qualquer cor fixa por currentColor automaticamente
-// SVGs exportados do Figma com fill="#555" ou fill="black" funcionam sem edição manual
+// ── Normaliza e salva cada SVG individualmente ───────────────
 function normalizeSVG(content) {
-  return content
-    // Remove declaração XML
+  // Extrai viewBox
+  const vbMatch = content.match(/viewBox="([^"]+)"/);
+  const viewBox = vbMatch ? vbMatch[1] : "0 0 24 24";
+
+  // Extrai conteúdo interno
+  let inner = content
     .replace(/<\?xml[^>]*\?>/g, "")
-    // Preserva fill="none" temporariamente
-    .replace(/fill="none"/gi, "%%FILL_NONE%%")
-    // Preserva fill="white" como none (fundo transparente)
-    .replace(/fill="white"/gi, "%%FILL_NONE%%")
-    // Substitui todas as cores fixas de fill por currentColor
-    .replace(/fill="[^"]+"/g, 'fill="currentColor"')
-    // Substitui todas as cores fixas de stroke por currentColor
-    .replace(/stroke="[^"]+"/g, 'stroke="currentColor"')
-    // Restaura fill="none"
-    .replace(/%%FILL_NONE%%/g, 'fill="none"')
-    // Remove clipPath (causa problemas na máscara)
+    .replace(/<!DOCTYPE[^>]*>/g, "")
+    .replace(/<svg[^>]*>/g, "")
+    .replace(/<\/svg>/g, "")
     .replace(/<clipPath[^>]*>[\s\S]*?<\/clipPath>/g, "")
     .replace(/clip-path="[^"]*"/g, "")
     .replace(/<defs>[\s\S]*?<\/defs>/g, "")
-    // Remove atributos de tamanho fixo do SVG raiz
-    .replace(/<svg[^>]*>/g, "")
-    .replace(/<\/svg>/g, "")
+    .replace(/fill="none"/gi, "%%NONE%%")
+    .replace(/fill="white"/gi, "%%NONE%%")
+    .replace(/fill="[^%][^"]*"/g, 'fill="currentColor"')
+    .replace(/stroke="none"/gi, "%%SNONE%%")
+    .replace(/stroke="[^%][^"]*"/g, 'stroke="currentColor"')
+    .replace(/%%NONE%%/g, 'fill="none"')
+    .replace(/%%SNONE%%/g, 'stroke="none"')
     .trim();
+
+  // Devolve SVG completo e válido — SEM display:none
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}">\n${inner}\n</svg>`;
 }
 
-// ── Processa SVGs ────────────────────────────────────────────
-const symbolsData = svgFiles.map(file => {
+const svgData = svgFiles.map(file => {
   const id      = path.basename(file, ".svg");
   const content = fs.readFileSync(path.join(SVGS_DIR, file), "utf8");
-  const viewBox = "0 0 24 24";
   const catMatch = content.match(/<!--\s*categoria:\s*(.+?)\s*-->/i);
   const cat   = catMatch ? catMatch[1] : "Geral";
-  const inner = normalizeSVG(content);
-  return { id, viewBox, inner, cat, type: "svg" };
+  const normalized = normalizeSVG(content);
+
+  // Salva SVG individual em dist/svgs/
+  fs.writeFileSync(path.join(DIST_SVGS, file), normalized);
+
+  return { id, cat, type: "svg" };
 });
 
-// ── Processa PNGs ─────────────────────────────────────────────
 const pngData = pngFiles.map(file => {
   const id = path.basename(file, ".png");
-  fs.copyFileSync(path.join(SVGS_DIR, file), path.join(IMGS_DIR, file));
-  return { id, file, cat: "Geral", type: "png" };
+  fs.copyFileSync(path.join(SVGS_DIR, file), path.join(DIST_IMGS, file));
+  return { id, cat: "Geral", type: "png" };
 });
 
 console.log(`📦 SVGs: ${svgFiles.length} | PNGs: ${pngFiles.length}`);
-
-// ── Gera o Sprite SVG ────────────────────────────────────────
-if (symbolsData.length > 0) {
-  const spriteSymbols = symbolsData.map(({ id, viewBox, inner }) =>
-    `  <symbol id="${id}" viewBox="${viewBox}">\n    ${inner}\n  </symbol>`
-  );
-  const sprite = `<svg xmlns="http://www.w3.org/2000/svg" style="display:none">\n${spriteSymbols.join("\n\n")}\n</svg>\n`;
-  fs.writeFileSync(SPRITE, sprite);
-  console.log(`✅ Sprite gerado: ${SPRITE}`);
-}
+console.log(`✅ SVGs individuais salvos em dist/svgs/`);
 
 // ── Agrupa por categoria ──────────────────────────────────────
 const categories = {};
-symbolsData.forEach(({ id, cat }) => {
+[...svgData, ...pngData].forEach(({ id, cat, type }) => {
   if (!categories[cat]) categories[cat] = [];
-  categories[cat].push({ id, type: "svg" });
-});
-pngData.forEach(({ id, cat }) => {
-  if (!categories[cat]) categories[cat] = [];
-  categories[cat].push({ id, type: "png" });
+  categories[cat].push({ id, type });
 });
 
-// ── Gera o CSS ───────────────────────────────────────────────
+// ── Gera CSS ─────────────────────────────────────────────────
 let iconCSS = "";
 Object.entries(categories).forEach(([cat, icons]) => {
   iconCSS += `\n/* --- ${cat} --- */\n`;
   icons.forEach(({ id, type }) => {
     if (type === "svg") {
-      iconCSS += `.${id.padEnd(24)}{ --bf-mask: url("${BASE_URL}/bf-icons.svg#${id}"); }\n`;
+      iconCSS += `.${id.padEnd(24)}{ --bf-mask: url("${BASE_URL}/svgs/${id}.svg"); }\n`;
     } else {
       iconCSS += `.${id.padEnd(24)}{ --bf-png: url("${BASE_URL}/imgs/${id}.png"); }\n`;
     }
@@ -117,7 +108,7 @@ Object.entries(categories).forEach(([cat, icons]) => {
 
 const css = `/*!
  * Beer Fácil Icons v1.0.0
- * Gerado em ${new Date().toISOString().slice(0,10)} — ${allFiles.length} ícones (${svgFiles.length} SVG + ${pngFiles.length} PNG)
+ * Gerado em ${new Date().toISOString().slice(0,10)} — ${allFiles.length} ícones
  * Uso: <link rel="stylesheet" href="${BASE_URL}/bf-icons.css">
  */
 
@@ -126,7 +117,6 @@ const css = `/*!
   --bf-icon-color: currentColor;
 }
 
-/* ── SVG: cor herdada do texto ── */
 .bf {
   display: inline-block;
   width:  var(--bf-icon-size);
@@ -145,11 +135,12 @@ const css = `/*!
           mask-image: var(--bf-mask);
   -webkit-mask-repeat: no-repeat;
           mask-repeat: no-repeat;
-  -webkit-mask-size: 100% 100%;
-          mask-size: 100% 100%;
+  -webkit-mask-size: contain;
+          mask-size: contain;
+  -webkit-mask-position: center;
+          mask-position: center;
 }
 
-/* ── PNG: cores originais mantidas ── */
 .bf-png::before { display: none; }
 .bf-png {
   background-image: var(--bf-png);
@@ -158,7 +149,6 @@ const css = `/*!
   background-position: center;
 }
 
-/* Tamanhos */
 .bf-xs { --bf-icon-size: 0.75rem; }
 .bf-sm { --bf-icon-size: 1rem;    }
 .bf-md { --bf-icon-size: 1.5rem;  }
@@ -169,7 +159,6 @@ const css = `/*!
 .bf-4x { --bf-icon-size: 4em;     }
 .bf-5x { --bf-icon-size: 5em;     }
 
-/* Cores (só afeta SVG) */
 .bf-primary   { --bf-icon-color: #F5A623; }
 .bf-secondary { --bf-icon-color: #6c757d; }
 .bf-success   { --bf-icon-color: #198754; }
@@ -184,17 +173,10 @@ ${iconCSS}`;
 fs.writeFileSync(CSS_OUT, css);
 console.log(`✅ CSS gerado:    ${CSS_OUT}`);
 
-// ── Gera a Demo ──────────────────────────────────────────────
-const spriteInline = symbolsData.length > 0
-  ? `<svg xmlns="http://www.w3.org/2000/svg" style="display:none">\n${
-      symbolsData.map(({ id, viewBox, inner }) =>
-        `  <symbol id="${id}" viewBox="${viewBox}">\n    ${inner}\n  </symbol>`
-      ).join("\n\n")
-    }\n</svg>`
-  : "";
-
+// ── Gera Demo ────────────────────────────────────────────────
 const demoIconCSS = [
-  ...symbolsData.map(({ id }) => `.${id} { --bf-mask: url(#${id}); }`),
+  ...svgData.map(({ id }) =>
+    `.${id} { --bf-mask: url("${BASE_URL}/svgs/${id}.svg"); }`),
   ...pngData.map(({ id }) => [
     `.${id} { --bf-png: url("${BASE_URL}/imgs/${id}.png"); background-image:var(--bf-png); background-size:contain; background-repeat:no-repeat; background-position:center; }`,
     `.${id}::before { display:none; }`
@@ -243,33 +225,27 @@ const demo = `<!DOCTYPE html>
     .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
     :root { --bf-icon-size:1em; --bf-icon-color:currentColor; }
     .bf { display:inline-block; width:var(--bf-icon-size); height:var(--bf-icon-size); vertical-align:-0.125em; overflow:hidden; }
-    .bf::before { content:""; display:block; width:100%; height:100%; background-color:var(--bf-icon-color); -webkit-mask-image:var(--bf-mask); mask-image:var(--bf-mask); -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat; -webkit-mask-size:100% 100%; mask-size:100% 100%; }
+    .bf::before { content:""; display:block; width:100%; height:100%; background-color:var(--bf-icon-color); -webkit-mask-image:var(--bf-mask); mask-image:var(--bf-mask); -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat; -webkit-mask-size:contain; mask-size:contain; -webkit-mask-position:center; mask-position:center; }
     .bf-xs{--bf-icon-size:.75rem} .bf-sm{--bf-icon-size:1rem} .bf-md{--bf-icon-size:1.5rem} .bf-lg{--bf-icon-size:2rem} .bf-xl{--bf-icon-size:3rem}
     .bf-primary{--bf-icon-color:#F5A623} .bf-success{--bf-icon-color:#198754} .bf-danger{--bf-icon-color:#dc3545}
     ${demoIconCSS}
   </style>
 </head>
 <body>
-
-${spriteInline}
-
 <header class="hero">
   <h1>🍺 Beer<span>Fácil</span> Icons</h1>
   <p>Biblioteca de ícones SVG + PNG. Adicione novos no Cloudflare — todos os projetos atualizam automaticamente.</p>
   <span class="badge">v1.0.0 · ${allFiles.length} ícones</span>
 </header>
-
 <div class="install">
   <div class="install-box">
     <div class="install-label">Incluir no projeto — só esta linha</div>
     <code class="install-code">&lt;link rel="stylesheet" href="${BASE_URL}/bf-icons.css"&gt;</code>
   </div>
 </div>
-
 <main class="container">
 ${catSections}
 </main>
-
 <div class="toast" id="toast"></div>
 <script>
 function copy(name) {
@@ -284,8 +260,6 @@ function copy(name) {
 </body>
 </html>`;
 
-const demoOut = path.join(DIST_DIR, "index.html");
-fs.writeFileSync(demoOut, demo);
-console.log(`✅ Demo gerada:   ${demoOut}`);
+fs.writeFileSync(path.join(DIST_DIR, "index.html"), demo);
+console.log(`✅ Demo gerada`);
 console.log(`\n📋 Vitrine: ${BASE_URL}`);
-console.log(`📋 CSS:     <link rel="stylesheet" href="${BASE_URL}/bf-icons.css">`);
