@@ -79,10 +79,25 @@ const svgData = svgFiles.map(file => {
 });
 
 // ── Processa PNGs ────────────────────────────────────────────
+// Categoria vem do nome do arquivo após "--"
+// Exemplos:
+//   bf-waving-hand--app.png         → id: bf-waving-hand, cats: ["App"]
+//   bf-beer--panel.png              → id: bf-beer,         cats: ["Painel Admin"]
+//   bf-fire--app--panel.png         → id: bf-fire,         cats: ["App", "Painel Admin"]
+//   bf-emoji.png                    → id: bf-emoji,        cats: ["Geral"]
+const CAT_ALIAS = { "app": "App", "panel": "Painel Admin", "painel": "Painel Admin" };
+
 const pngData = pngFiles.map(file => {
-  const id = path.basename(file, ".png");
-  fs.copyFileSync(path.join(SVGS_DIR, file), path.join(DIST_IMGS, file));
-  return { id, cats: ["Geral"], type: "png" };
+  const raw  = path.basename(file, ".png");   // ex: bf-fire--app--panel
+  const parts = raw.split("--");
+  const id   = parts[0];                      // ex: bf-fire
+  const cats = parts.slice(1).length > 0
+    ? parts.slice(1).map(p => CAT_ALIAS[p.toLowerCase()] || p)
+    : ["Geral"];
+
+  // Copia para dist/imgs/ usando o id limpo (sem --categoria)
+  fs.copyFileSync(path.join(SVGS_DIR, file), path.join(DIST_IMGS, id + ".png"));
+  return { id, cats, type: "png" };
 });
 
 console.log(`📦 SVGs: ${svgFiles.length} | PNGs: ${pngFiles.length}`);
