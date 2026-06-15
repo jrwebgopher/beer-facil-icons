@@ -258,13 +258,13 @@ const demo = `<!DOCTYPE html>
 </head>
 <body>
 <header class="hero">
-  <h1>🍺 Beer<span>Fácil</span> Icons</h1>
-  <p>Biblioteca de ícones SVG + PNG. Adicione novos no Cloudflare — todos os projetos atualizam automaticamente.</p>
+  <h1>🍺 Beer<span> Fácil</span> Icons</h1>
+  <p>Biblioteca de ícones Beer Fácil</p>
   <span class="badge">v1.0.0 · ${allFiles.length} ícones</span>
 </header>
 <div class="install">
   <div class="install-box">
-    <div class="install-label">Incluir no projeto — só esta linha</div>
+    <div class="install-label">Incluir no projeto</div>
     <code class="install-code">&lt;link rel="stylesheet" href="${BASE_URL}/bf-icons.css"&gt;</code>
   </div>
 </div>
