@@ -2,6 +2,7 @@
 /**
  * Beer Fácil Icons — Build Script
  * Suporta SVG (máscara CSS) e PNG (background-image colorido)
+ * SVGs exportados do Figma com cores fixas são normalizados automaticamente.
  */
 
 const fs   = require("fs");
@@ -33,6 +34,33 @@ if (allFiles.length === 0) {
 const svgFiles = allFiles.filter(f => f.endsWith(".svg"));
 const pngFiles = allFiles.filter(f => f.endsWith(".png"));
 
+// ── Normaliza SVG para currentColor ──────────────────────────
+// Substitui qualquer cor fixa por currentColor automaticamente
+// SVGs exportados do Figma com fill="#555" ou fill="black" funcionam sem edição manual
+function normalizeSVG(content) {
+  return content
+    // Remove declaração XML
+    .replace(/<\?xml[^>]*\?>/g, "")
+    // Preserva fill="none" temporariamente
+    .replace(/fill="none"/gi, "%%FILL_NONE%%")
+    // Preserva fill="white" como none (fundo transparente)
+    .replace(/fill="white"/gi, "%%FILL_NONE%%")
+    // Substitui todas as cores fixas de fill por currentColor
+    .replace(/fill="[^"]+"/g, 'fill="currentColor"')
+    // Substitui todas as cores fixas de stroke por currentColor
+    .replace(/stroke="[^"]+"/g, 'stroke="currentColor"')
+    // Restaura fill="none"
+    .replace(/%%FILL_NONE%%/g, 'fill="none"')
+    // Remove clipPath (causa problemas na máscara)
+    .replace(/<clipPath[^>]*>[\s\S]*?<\/clipPath>/g, "")
+    .replace(/clip-path="[^"]*"/g, "")
+    .replace(/<defs>[\s\S]*?<\/defs>/g, "")
+    // Remove atributos de tamanho fixo do SVG raiz
+    .replace(/<svg[^>]*>/g, "")
+    .replace(/<\/svg>/g, "")
+    .trim();
+}
+
 // ── Processa SVGs ────────────────────────────────────────────
 const symbolsData = svgFiles.map(file => {
   const id      = path.basename(file, ".svg");
@@ -40,19 +68,14 @@ const symbolsData = svgFiles.map(file => {
   const vbMatch = content.match(/viewBox="([^"]+)"/);
   const viewBox = vbMatch ? vbMatch[1] : "0 0 24 24";
   const catMatch = content.match(/<!--\s*categoria:\s*(.+?)\s*-->/i);
-  const cat = catMatch ? catMatch[1] : "Geral";
-  const inner = content
-    .replace(/<\?xml[^>]*\?>/g, "")
-    .replace(/<svg[^>]*>/g, "")
-    .replace(/<\/svg>/g, "")
-    .trim();
+  const cat   = catMatch ? catMatch[1] : "Geral";
+  const inner = normalizeSVG(content);
   return { id, viewBox, inner, cat, type: "svg" };
 });
 
 // ── Processa PNGs ─────────────────────────────────────────────
 const pngData = pngFiles.map(file => {
   const id = path.basename(file, ".png");
-  // Copia o PNG para dist/imgs/
   fs.copyFileSync(path.join(SVGS_DIR, file), path.join(IMGS_DIR, file));
   return { id, file, cat: "Geral", type: "png" };
 });
@@ -69,29 +92,26 @@ if (symbolsData.length > 0) {
   console.log(`✅ Sprite gerado: ${SPRITE}`);
 }
 
-// ── Gera o CSS ───────────────────────────────────────────────
+// ── Agrupa por categoria ──────────────────────────────────────
 const categories = {};
-
-// Agrupa SVGs por categoria
 symbolsData.forEach(({ id, cat }) => {
   if (!categories[cat]) categories[cat] = [];
   categories[cat].push({ id, type: "svg" });
 });
-
-// Agrupa PNGs por categoria
 pngData.forEach(({ id, cat }) => {
   if (!categories[cat]) categories[cat] = [];
   categories[cat].push({ id, type: "png" });
 });
 
+// ── Gera o CSS ───────────────────────────────────────────────
 let iconCSS = "";
 Object.entries(categories).forEach(([cat, icons]) => {
   iconCSS += `\n/* --- ${cat} --- */\n`;
   icons.forEach(({ id, type }) => {
     if (type === "svg") {
-      iconCSS += `.${id.padEnd(22)}{ --bf-mask: url("${BASE_URL}/bf-icons.svg#${id}"); }\n`;
+      iconCSS += `.${id.padEnd(24)}{ --bf-mask: url("${BASE_URL}/bf-icons.svg#${id}"); }\n`;
     } else {
-      iconCSS += `.${id.padEnd(22)}{ --bf-png: url("${BASE_URL}/imgs/${id}.png"); }\n`;
+      iconCSS += `.${id.padEnd(24)}{ --bf-png: url("${BASE_URL}/imgs/${id}.png"); }\n`;
     }
   });
 });
@@ -107,14 +127,13 @@ const css = `/*!
   --bf-icon-color: currentColor;
 }
 
-/* ── Base SVG (máscara — cor herdada do texto) ── */
+/* ── SVG: cor herdada do texto ── */
 .bf {
   display: inline-block;
   width:  var(--bf-icon-size);
   height: var(--bf-icon-size);
   vertical-align: -0.125em;
   overflow: hidden;
-  position: relative;
 }
 
 .bf::before {
@@ -131,17 +150,13 @@ const css = `/*!
           mask-size: 100% 100%;
 }
 
-/* ── Base PNG (background-image — cores originais mantidas) ── */
-.bf[class*="bf-"][style*="--bf-png"],
+/* ── PNG: cores originais mantidas ── */
+.bf-png::before { display: none; }
 .bf-png {
   background-image: var(--bf-png);
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-}
-
-.bf-png::before {
-  display: none;
 }
 
 /* Tamanhos */
@@ -171,7 +186,6 @@ fs.writeFileSync(CSS_OUT, css);
 console.log(`✅ CSS gerado:    ${CSS_OUT}`);
 
 // ── Gera a Demo ──────────────────────────────────────────────
-// Sprite inline para SVGs
 const spriteInline = symbolsData.length > 0
   ? `<svg xmlns="http://www.w3.org/2000/svg" style="display:none">\n${
       symbolsData.map(({ id, viewBox, inner }) =>
@@ -180,13 +194,14 @@ const spriteInline = symbolsData.length > 0
     }\n</svg>`
   : "";
 
-// CSS inline da demo — SVG usa #id local, PNG usa URL real
 const demoIconCSS = [
   ...symbolsData.map(({ id }) => `.${id} { --bf-mask: url(#${id}); }`),
-  ...pngData.map(({ id }) => `.${id} { --bf-png: url("${BASE_URL}/imgs/${id}.png"); background-image:var(--bf-png); background-size:contain; background-repeat:no-repeat; background-position:center; }\n.${id}::before { display:none; }`)
+  ...pngData.map(({ id }) => [
+    `.${id} { --bf-png: url("${BASE_URL}/imgs/${id}.png"); background-image:var(--bf-png); background-size:contain; background-repeat:no-repeat; background-position:center; }`,
+    `.${id}::before { display:none; }`
+  ].join("\n"))
 ].join("\n");
 
-// Cards da vitrine
 const catSections = Object.entries(categories).map(([cat, icons]) => {
   const cards = icons.map(({ id, type }) => `
     <div class="icon-card" onclick="copy('${id}')">
