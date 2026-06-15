@@ -21,7 +21,7 @@ const path = require("path");
 // ── Configurações ────────────────────────────────────────────
 const BASE_URL  = process.argv.includes("--base-url")
   ? process.argv[process.argv.indexOf("--base-url") + 1]
-  : "https://SEU_DOMINIO.pages.dev/icons";
+  : "https://beer-facil-icons.pages.dev/icons";
 
 const SVGS_DIR  = path.join(__dirname, "src/svgs");
 const DIST_DIR  = path.join(__dirname, "dist");
@@ -141,6 +141,12 @@ const css = `/*!
 .bf-light     { --bf-icon-color: #f8f9fa; }
 .bf-white     { --bf-icon-color: #ffffff; }
 ${iconCSS}`;
+
+// Copia a página de demonstração para o dist
+const demoSrc  = path.join(__dirname, "demo/index.html");
+const demoDest = path.join(DIST_DIR, "index.html");
+fs.copyFileSync(demoSrc, demoDest);
+console.log(`✅ Demo copiada:  ${demoDest}`);
 
 fs.writeFileSync(CSS_OUT, css);
 console.log(`✅ CSS gerado:    ${CSS_OUT}`);
