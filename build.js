@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
  * Beer Fácil Icons — Build Script
- * Cada ícone SVG vira um arquivo individual em dist/svgs/
- * PNG vai para dist/imgs/
- * CSS usa url("svgs/bf-note.svg") — sem sprite, sem display:none
+ * - SVGs individuais em dist/svgs/ (sem display:none)
+ * - PNGs em dist/imgs/
+ * - Suporte a múltiplas categorias: <!-- categoria: App, Painel Admin -->
  */
 
 const fs   = require("fs");
@@ -36,14 +36,12 @@ if (allFiles.length === 0) {
 const svgFiles = allFiles.filter(f => f.endsWith(".svg"));
 const pngFiles = allFiles.filter(f => f.endsWith(".png"));
 
-// ── Normaliza e salva cada SVG individualmente ───────────────
+// ── Normaliza SVG ────────────────────────────────────────────
 function normalizeSVG(content) {
-  // Extrai viewBox
   const vbMatch = content.match(/viewBox="([^"]+)"/);
   const viewBox = vbMatch ? vbMatch[1] : "0 0 24 24";
 
-  // Extrai conteúdo interno
-  let inner = content
+  const inner = content
     .replace(/<\?xml[^>]*\?>/g, "")
     .replace(/<!DOCTYPE[^>]*>/g, "")
     .replace(/<svg[^>]*>/g, "")
@@ -60,50 +58,53 @@ function normalizeSVG(content) {
     .replace(/%%SNONE%%/g, 'stroke="none"')
     .trim();
 
-  // Devolve SVG completo e válido — SEM display:none
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}">\n${inner}\n</svg>`;
 }
 
+// ── Extrai categorias (suporta múltiplas separadas por vírgula) ──
+function getCats(content) {
+  const match = content.match(/<!--\s*categoria:\s*(.+?)\s*-->/i);
+  if (!match) return ["Geral"];
+  return match[1].split(",").map(c => c.trim()).filter(Boolean);
+}
+
+// ── Processa SVGs ────────────────────────────────────────────
 const svgData = svgFiles.map(file => {
   const id      = path.basename(file, ".svg");
   const content = fs.readFileSync(path.join(SVGS_DIR, file), "utf8");
-  const catMatch = content.match(/<!--\s*categoria:\s*(.+?)\s*-->/i);
-  const cat   = catMatch ? catMatch[1] : "Geral";
+  const cats    = getCats(content);
   const normalized = normalizeSVG(content);
-
-  // Salva SVG individual em dist/svgs/
   fs.writeFileSync(path.join(DIST_SVGS, file), normalized);
-
-  return { id, cat, type: "svg" };
+  return { id, cats, type: "svg" };
 });
 
+// ── Processa PNGs ────────────────────────────────────────────
 const pngData = pngFiles.map(file => {
   const id = path.basename(file, ".png");
   fs.copyFileSync(path.join(SVGS_DIR, file), path.join(DIST_IMGS, file));
-  return { id, cat: "Geral", type: "png" };
+  return { id, cats: ["Geral"], type: "png" };
 });
 
 console.log(`📦 SVGs: ${svgFiles.length} | PNGs: ${pngFiles.length}`);
-console.log(`✅ SVGs individuais salvos em dist/svgs/`);
 
-// ── Agrupa por categoria ──────────────────────────────────────
+// ── Agrupa por categoria (ícone pode aparecer em várias) ──────
 const categories = {};
-[...svgData, ...pngData].forEach(({ id, cat, type }) => {
-  if (!categories[cat]) categories[cat] = [];
-  categories[cat].push({ id, type });
+[...svgData, ...pngData].forEach(({ id, cats, type }) => {
+  cats.forEach(cat => {
+    if (!categories[cat]) categories[cat] = [];
+    categories[cat].push({ id, type });
+  });
 });
 
 // ── Gera CSS ─────────────────────────────────────────────────
-let iconCSS = "";
-Object.entries(categories).forEach(([cat, icons]) => {
-  iconCSS += `\n/* --- ${cat} --- */\n`;
-  icons.forEach(({ id, type }) => {
-    if (type === "svg") {
-      iconCSS += `.${id.padEnd(24)}{ --bf-mask: url("${BASE_URL}/svgs/${id}.svg"); }\n`;
-    } else {
-      iconCSS += `.${id.padEnd(24)}{ --bf-png: url("${BASE_URL}/imgs/${id}.png"); }\n`;
-    }
-  });
+const allIcons = [...svgData, ...pngData];
+let iconCSS = "\n/* --- Ícones --- */\n";
+allIcons.forEach(({ id, type }) => {
+  if (type === "svg") {
+    iconCSS += `.${id.padEnd(24)}{ --bf-mask: url("${BASE_URL}/svgs/${id}.svg"); }\n`;
+  } else {
+    iconCSS += `.${id.padEnd(24)}{ --bf-png: url("${BASE_URL}/imgs/${id}.png"); }\n`;
+  }
 });
 
 const css = `/*!
@@ -171,7 +172,7 @@ const css = `/*!
 ${iconCSS}`;
 
 fs.writeFileSync(CSS_OUT, css);
-console.log(`✅ CSS gerado:    ${CSS_OUT}`);
+console.log(`✅ CSS gerado: ${CSS_OUT}`);
 
 // ── Gera Demo ────────────────────────────────────────────────
 const demoIconCSS = [
@@ -183,7 +184,15 @@ const demoIconCSS = [
   ].join("\n"))
 ].join("\n");
 
-const catSections = Object.entries(categories).map(([cat, icons]) => {
+// Ordena categorias: App e Painel Admin primeiro, Geral por último
+const catOrder = ["App", "Painel Admin"];
+const sortedCats = [
+  ...catOrder.filter(c => categories[c]),
+  ...Object.keys(categories).filter(c => !catOrder.includes(c))
+];
+
+const catSections = sortedCats.map(cat => {
+  const icons = categories[cat];
   const cards = icons.map(({ id, type }) => `
     <div class="icon-card" onclick="copy('${id}')">
       <i class="bf ${id} bf-xl${type === "svg" ? " bf-primary" : ""}"></i>
@@ -191,7 +200,7 @@ const catSections = Object.entries(categories).map(([cat, icons]) => {
       <span class="icon-type">${type.toUpperCase()}</span>
     </div>`).join("");
   return `
-  <div class="section-title">${cat.toUpperCase()}</div>
+  <div class="section-title">${cat.toUpperCase()} <span class="section-count">${icons.length} ícones</span></div>
   <div class="icon-grid">${cards}
   </div>`;
 }).join("\n");
@@ -215,7 +224,8 @@ const demo = `<!DOCTYPE html>
     .install-label { font-size:.68rem; text-transform:uppercase; letter-spacing:.1em; color:#F5A623; margin-bottom:.35rem; }
     .install-code { font-family:"SF Mono","Fira Code",monospace; font-size:.82rem; color:#a8d8a8; word-break:break-all; }
     .container { max-width:960px; margin:0 auto; padding:2rem 1.5rem 4rem; }
-    .section-title { font-size:.68rem; text-transform:uppercase; letter-spacing:.14em; color:#F5A623; margin:2rem 0 .75rem; padding-bottom:.4rem; border-bottom:1px solid #F5A62320; }
+    .section-title { font-size:.68rem; text-transform:uppercase; letter-spacing:.14em; color:#F5A623; margin:2rem 0 .75rem; padding-bottom:.4rem; border-bottom:1px solid #F5A62320; display:flex; align-items:center; gap:.75rem; }
+    .section-count { font-size:.65rem; color:#5a5a6a; font-weight:400; letter-spacing:0; text-transform:none; }
     .icon-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:.6rem; }
     .icon-card { background:#1a1a24; border:1px solid #ffffff0a; border-radius:10px; padding:1.1rem .75rem .9rem; display:flex; flex-direction:column; align-items:center; gap:.5rem; cursor:pointer; transition:border-color .15s,background .15s,transform .1s; }
     .icon-card:hover { border-color:#F5A62360; background:#221811; transform:translateY(-2px); }
