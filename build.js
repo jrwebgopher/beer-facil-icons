@@ -65,8 +65,7 @@ function normalizeSVG(content) {
 const symbolsData = svgFiles.map(file => {
   const id      = path.basename(file, ".svg");
   const content = fs.readFileSync(path.join(SVGS_DIR, file), "utf8");
-  const vbMatch = content.match(/viewBox="([^"]+)"/);
-  const viewBox = vbMatch ? vbMatch[1] : "0 0 24 24";
+  const viewBox = "0 0 24 24";
   const catMatch = content.match(/<!--\s*categoria:\s*(.+?)\s*-->/i);
   const cat   = catMatch ? catMatch[1] : "Geral";
   const inner = normalizeSVG(content);
