@@ -1,0 +1,106 @@
+/*!
+ * Beer Fácil Icons v1.0.0
+ * Biblioteca de ícones SVG para o projeto Beer Fácil
+ * Hospedado no Cloudflare — atualizações automáticas
+ * https://seu-projeto.pages.dev/icons/
+ */
+
+/* ============================================================
+   CARREGAMENTO DINÂMICO DO SPRITE SVG
+   O sprite é injetado automaticamente no DOM ao carregar o CSS.
+   Ao adicionar novos ícones no Cloudflare, todos os projetos
+   recebem os ícones na próxima carga da página — sem atualizar código.
+   ============================================================ */
+
+:root {
+  --bf-icon-size:     1em;
+  --bf-icon-color:    currentColor;
+  --bf-icon-weight:   1.8px;
+}
+
+/* ---- Base do ícone (igual ao Bootstrap Icons) ---- */
+.bf {
+  display: inline-block;
+  width: var(--bf-icon-size);
+  height: var(--bf-icon-size);
+  vertical-align: -0.125em;          /* alinha com texto, como bi-* */
+  overflow: hidden;
+}
+
+.bf::before {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-color: var(--bf-icon-color);
+
+  /* Máscara SVG — aponta para o sprite no Cloudflare */
+  -webkit-mask-image: var(--bf-mask);
+          mask-image: var(--bf-mask);
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+          mask-size: 100% 100%;
+}
+
+/* ============================================================
+   TAMANHOS — mesmo padrão do Bootstrap
+   ============================================================ */
+.bf-xs  { --bf-icon-size: 0.75rem; }
+.bf-sm  { --bf-icon-size: 1rem;    }
+.bf-md  { --bf-icon-size: 1.5rem;  }
+.bf-lg  { --bf-icon-size: 2rem;    }
+.bf-xl  { --bf-icon-size: 3rem;    }
+.bf-2x  { --bf-icon-size: 2em;     }
+.bf-3x  { --bf-icon-size: 3em;     }
+.bf-4x  { --bf-icon-size: 4em;     }
+.bf-5x  { --bf-icon-size: 5em;     }
+
+/* ============================================================
+   CORES — utilitários prontos
+   ============================================================ */
+.bf-primary   { --bf-icon-color: #F5A623; }  /* Âmbar Beer Fácil */
+.bf-secondary { --bf-icon-color: #6c757d; }
+.bf-success   { --bf-icon-color: #198754; }
+.bf-danger    { --bf-icon-color: #dc3545; }
+.bf-warning   { --bf-icon-color: #ffc107; }
+.bf-info      { --bf-icon-color: #0dcaf0; }
+.bf-dark      { --bf-icon-color: #212529; }
+.bf-light     { --bf-icon-color: #f8f9fa; }
+.bf-white     { --bf-icon-color: #ffffff; }
+
+/* ============================================================
+   ÍCONES — cada classe define a máscara do seu símbolo SVG.
+   
+   BASE_URL é substituída automaticamente pelo Cloudflare Pages.
+   ============================================================ */
+
+/* --- Bebidas --- */
+.bf-cerveja     { --bf-mask: url("https://SEU_DOMINIO.pages.dev/icons/bf-icons.svg#bf-cerveja");     }
+.bf-chopp       { --bf-mask: url("https://SEU_DOMINIO.pages.dev/icons/bf-icons.svg#bf-chopp");       }
+.bf-garrafa     { --bf-mask: url("https://SEU_DOMINIO.pages.dev/icons/bf-icons.svg#bf-garrafa");     }
+.bf-barril      { --bf-mask: url("https://SEU_DOMINIO.pages.dev/icons/bf-icons.svg#bf-barril");      }
+.bf-lata        { --bf-mask: url("https://SEU_DOMINIO.pages.dev/icons/bf-icons.svg#bf-lata");        }
+.bf-copo        { --bf-mask: url("https://SEU_DOMINIO.pages.dev/icons/bf-icons.svg#bf-copo");        }
+.bf-espuma      { --bf-mask: url("https://SEU_DOMINIO.pages.dev/icons/bf-icons.svg#bf-espuma");      }
+.bf-lupulo      { --bf-mask: url("https://SEU_DOMINIO.pages.dev/icons/bf-icons.svg#bf-lupulo");      }
+.bf-cevada      { --bf-mask: url("https://SEU_DOMINIO.pages.dev/icons/bf-icons.svg#bf-cevada");      }
+.bf-torneira    { --bf-mask: url("https://SEU_DOMINIO.pages.dev/icons/bf-icons.svg#bf-torneira");    }
+
+/* --- Estabelecimento --- */
+.bf-mesa        { --bf-mask: url("https://SEU_DOMINIO.pages.dev/icons/bf-icons.svg#bf-mesa");        }
+.bf-cardapio    { --bf-mask: url("https://SEU_DOMINIO.pages.dev/icons/bf-icons.svg#bf-cardapio");    }
+.bf-pedido      { --bf-mask: url("https://SEU_DOMINIO.pages.dev/icons/bf-icons.svg#bf-pedido");      }
+.bf-estoque     { --bf-mask: url("https://SEU_DOMINIO.pages.dev/icons/bf-icons.svg#bf-estoque");     }
+.bf-entrega     { --bf-mask: url("https://SEU_DOMINIO.pages.dev/icons/bf-icons.svg#bf-entrega");     }
+.bf-pagamento   { --bf-mask: url("https://SEU_DOMINIO.pages.dev/icons/bf-icons.svg#bf-pagamento");   }
+
+/* --- Sistema --- */
+.bf-usuario     { --bf-mask: url("https://SEU_DOMINIO.pages.dev/icons/bf-icons.svg#bf-usuario");     }
+.bf-premio      { --bf-mask: url("https://SEU_DOMINIO.pages.dev/icons/bf-icons.svg#bf-premio");      }
+.bf-estrela     { --bf-mask: url("https://SEU_DOMINIO.pages.dev/icons/bf-icons.svg#bf-estrela");     }
+.bf-configuracao{ --bf-mask: url("https://SEU_DOMINIO.pages.dev/icons/bf-icons.svg#bf-configuracao");}
+.bf-busca       { --bf-mask: url("https://SEU_DOMINIO.pages.dev/icons/bf-icons.svg#bf-busca");       }
+.bf-filtro      { --bf-mask: url("https://SEU_DOMINIO.pages.dev/icons/bf-icons.svg#bf-filtro");      }
+.bf-alerta      { --bf-mask: url("https://SEU_DOMINIO.pages.dev/icons/bf-icons.svg#bf-alerta");      }
+.bf-sucesso     { --bf-mask: url("https://SEU_DOMINIO.pages.dev/icons/bf-icons.svg#bf-sucesso");     }

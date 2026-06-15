@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beer Fácil Icons — Biblioteca de Ícones</title>
+
+  <!-- 
+    ╔══════════════════════════════════════════════════════════╗
+    ║  COMO O PROGRAMADOR USA NO PROJETO DELE                  ║
+    ║  Só adicionar esta linha. Ponto final.                   ║
+    ║  Ícones novos aparecem automaticamente sem atualizar.    ║
+    ╚══════════════════════════════════════════════════════════╝
+
+    <link rel="stylesheet" href="https://SEU_DOMINIO.pages.dev/icons/bf-icons.css">
+  -->
+
+  <!-- Para este demo, usamos o CSS e SVG locais -->
+  <style>
+    /* ── Reset e Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f1117;
+      color: #e8e8e8;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    .hero {
+      background: linear-gradient(135deg, #1a0a00 0%, #2d1500 50%, #1a0a00 100%);
+      border-bottom: 1px solid #F5A62330;
+      padding: 3rem 2rem 2.5rem;
+      text-align: center;
+    }
+
+    .hero-logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .beer-emoji { font-size: 2.5rem; }
+
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: #F5A623;
+      line-height: 1;
+    }
+
+    .hero h1 span { color: #fff; }
+
+    .hero-sub {
+      margin-top: 0.75rem;
+      font-size: 1.05rem;
+      color: #9a8a7a;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .badge-version {
+      display: inline-block;
+      margin-top: 1rem;
+      padding: 0.25rem 0.75rem;
+      background: #F5A62315;
+      border: 1px solid #F5A62340;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      color: #F5A623;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Install Box ── */
+    .install-section {
+      max-width: 860px;
+      margin: 2.5rem auto 0;
+      padding: 0 1.5rem;
+    }
+
+    .install-box {
+      background: #0a0a12;
+      border: 1px solid #F5A62330;
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+    }
+
+    .install-box-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #F5A623;
+      margin-bottom: 0.5rem;
+    }
+
+    .install-code {
+      display: block;
+      font-family: "SF Mono", "Fira Code", monospace;
+      font-size: 0.88rem;
+      color: #a8d8a8;
+      background: transparent;
+      border: none;
+      width: 100%;
+      cursor: text;
+      word-break: break-all;
+    }
+
+    /* ── Main ── */
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 4rem;
+    }
+
+    /* ── Section titles ── */
+    .section-title {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: #F5A623;
+      margin: 2.5rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #F5A62320;
+    }
+
+    /* ── Icon Grid ── */
+    .icon-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .icon-card {
+      background: #1a1a24;
+      border: 1px solid #ffffff0a;
+      border-radius: 10px;
+      padding: 1.25rem 0.75rem 1rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6rem;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s, transform 0.1s;
+      position: relative;
+    }
+
+    .icon-card:hover {
+      border-color: #F5A62360;
+      background: #221811;
+      transform: translateY(-2px);
+    }
+
+    .icon-card:active { transform: scale(0.97); }
+
+    .icon-name {
+      font-family: "SF Mono", "Fira Code", monospace;
+      font-size: 0.68rem;
+      color: #7a7a8a;
+      text-align: center;
+      word-break: break-all;
+    }
+
+    /* ── Copied toast ── */
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(8px);
+      background: #F5A623;
+      color: #1a0a00;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 0.5rem 1.25rem;
+      border-radius: 999px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s, transform 0.2s;
+      z-index: 999;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ── Demo uso ── */
+    .usage-demo {
+      background: #1a1a24;
+      border: 1px solid #ffffff0a;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-top: 0.75rem;
+    }
+
+    .usage-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.25rem;
+    }
+
+    .usage-row:last-child { margin-bottom: 0; }
+
+    .usage-label {
+      font-family: "SF Mono", "Fira Code", monospace;
+      font-size: 0.8rem;
+      color: #5a6a8a;
+      min-width: 260px;
+    }
+
+    /* ── Bf icon base CSS inline ── */
+    :root {
+      --bf-icon-size:  1em;
+      --bf-icon-color: currentColor;
+    }
+
+    .bf {
+      display: inline-block;
+      width:  var(--bf-icon-size);
+      height: var(--bf-icon-size);
+      vertical-align: -0.125em;
+      overflow: hidden;
+    }
+
+    .bf::before {
+      content: "";
+      display: block;
+      width: 100%;
+      height: 100%;
+      background-color: var(--bf-icon-color);
+      -webkit-mask-image: var(--bf-mask);
+              mask-image: var(--bf-mask);
+      -webkit-mask-repeat: no-repeat;
+              mask-repeat: no-repeat;
+      -webkit-mask-size: 100% 100%;
+              mask-size: 100% 100%;
+    }
+
+    .bf-xs { --bf-icon-size: 0.75rem; }
+    .bf-sm { --bf-icon-size: 1rem;    }
+    .bf-md { --bf-icon-size: 1.5rem;  }
+    .bf-lg { --bf-icon-size: 2rem;    }
+    .bf-xl { --bf-icon-size: 3rem;    }
+    .bf-2x { --bf-icon-size: 2em;     }
+    .bf-3x { --bf-icon-size: 3em;     }
+
+    .bf-primary   { --bf-icon-color: #F5A623; }
+    .bf-secondary { --bf-icon-color: #6c757d; }
+    .bf-success   { --bf-icon-color: #198754; }
+    .bf-danger    { --bf-icon-color: #dc3545; }
+    .bf-warning   { --bf-icon-color: #ffc107; }
+    .bf-info      { --bf-icon-color: #0dcaf0; }
+    .bf-light     { --bf-icon-color: #f8f9fa; }
+
+    /* Todos os ícones usando sprite inline */
+    .bf-cerveja     { --bf-mask: url(#bf-cerveja);     }
+    .bf-chopp       { --bf-mask: url(#bf-chopp);       }
+    .bf-garrafa     { --bf-mask: url(#bf-garrafa);     }
+    .bf-barril      { --bf-mask: url(#bf-barril);      }
+    .bf-lata        { --bf-mask: url(#bf-lata);        }
+    .bf-copo        { --bf-mask: url(#bf-copo);        }
+    .bf-espuma      { --bf-mask: url(#bf-espuma);      }
+    .bf-lupulo      { --bf-mask: url(#bf-lupulo);      }
+    .bf-cevada      { --bf-mask: url(#bf-cevada);      }
+    .bf-torneira    { --bf-mask: url(#bf-torneira);    }
+    .bf-mesa        { --bf-mask: url(#bf-mesa);        }
+    .bf-cardapio    { --bf-mask: url(#bf-cardapio);    }
+    .bf-pedido      { --bf-mask: url(#bf-pedido);      }
+    .bf-estoque     { --bf-mask: url(#bf-estoque);     }
+    .bf-entrega     { --bf-mask: url(#bf-entrega);     }
+    .bf-pagamento   { --bf-mask: url(#bf-pagamento);   }
+    .bf-usuario     { --bf-mask: url(#bf-usuario);     }
+    .bf-premio      { --bf-mask: url(#bf-premio);      }
+    .bf-estrela     { --bf-mask: url(#bf-estrela);     }
+    .bf-configuracao{ --bf-mask: url(#bf-configuracao);}
+    .bf-busca       { --bf-mask: url(#bf-busca);       }
+    .bf-filtro      { --bf-mask: url(#bf-filtro);      }
+    .bf-alerta      { --bf-mask: url(#bf-alerta);      }
+    .bf-sucesso     { --bf-mask: url(#bf-sucesso);     }
+  </style>
+</head>
+<body>
+
+<!-- SVG Sprite inline (no Cloudflare este é um arquivo separado) -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+  <symbol id="bf-cerveja" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 3h11l1 2H5z"/><rect x="4" y="5" width="12" height="15" rx="1"/>
+    <path d="M16 8h3a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1h-3"/>
+    <line x1="8" y1="10" x2="8" y2="17"/><line x1="12" y1="10" x2="12" y2="17"/>
+  </symbol>
+  <symbol id="bf-chopp" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6 2h10l1.5 2H5z"/><path d="M5 4h12l-1.5 17H6.5z"/>
+    <path d="M16 7h3.5a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H16"/>
+    <line x1="9" y1="9" x2="9" y2="18"/><line x1="13" y1="9" x2="13" y2="18"/>
+  </symbol>
+  <symbol id="bf-garrafa" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="9" y="2" width="6" height="3" rx="0.5"/>
+    <path d="M10 5h4l2 4v10a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2V9z"/>
+    <line x1="8" y1="14" x2="16" y2="14"/>
+  </symbol>
+  <symbol id="bf-barril" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <ellipse cx="12" cy="6" rx="8" ry="3"/><ellipse cx="12" cy="18" rx="8" ry="3"/>
+    <line x1="4" y1="6" x2="4" y2="18"/><line x1="20" y1="6" x2="20" y2="18"/>
+    <line x1="12" y1="3" x2="12" y2="21"/><line x1="4" y1="12" x2="20" y2="12"/>
+  </symbol>
+  <symbol id="bf-lata" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <ellipse cx="12" cy="5" rx="5" ry="2"/><ellipse cx="12" cy="19" rx="5" ry="2"/>
+    <line x1="7" y1="5" x2="7" y2="19"/><line x1="17" y1="5" x2="17" y2="19"/>
+    <path d="M10 3.5l1.5-1.5h1l1.5 1.5"/><line x1="12" y1="3" x2="12" y2="5"/>
+  </symbol>
+  <symbol id="bf-copo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M5 3h14l-3 18H8z"/><line x1="6" y1="9" x2="18" y2="9"/>
+  </symbol>
+  <symbol id="bf-espuma" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="7" cy="10" r="3"/><circle cx="12" cy="8" r="4"/><circle cx="17" cy="10" r="3"/>
+    <path d="M4 13h16v7a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/>
+  </symbol>
+  <symbol id="bf-lupulo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 22V10"/><path d="M12 14c0 0-3-2-5-5 3 0 5 2 5 2"/>
+    <path d="M12 10c0 0 3-2 5-5-3 0-5 2-5 2"/>
+    <ellipse cx="12" cy="6" rx="3" ry="4"/><line x1="12" y1="2" x2="12" y2="10"/>
+  </symbol>
+  <symbol id="bf-cevada" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="12" y1="22" x2="12" y2="6"/>
+    <path d="M12 18c-2-1-4-3-4-5s2-3 4-2"/><path d="M12 18c2-1 4-3 4-5s-2-3-4-2"/>
+    <path d="M12 12c-2-1-4-3-4-5s2-3 4-2"/><path d="M12 12c2-1 4-3 4-5s-2-3-4-2"/>
+    <path d="M9 4l3-3 3 3"/>
+  </symbol>
+  <symbol id="bf-torneira" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="8" width="8" height="5" rx="1"/>
+    <path d="M11 10h4l3-3h2"/><path d="M18 7v6"/>
+    <path d="M11 13v5a1 1 0 0 0 1 1h2"/><line x1="13" y1="19" x2="13" y2="22"/>
+  </symbol>
+  <symbol id="bf-mesa" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="2" y="8" width="20" height="3" rx="1"/>
+    <line x1="7" y1="11" x2="5" y2="21"/><line x1="17" y1="11" x2="19" y2="21"/>
+    <line x1="12" y1="11" x2="12" y2="21"/>
+  </symbol>
+  <symbol id="bf-cardapio" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="3" y="2" width="18" height="20" rx="2"/>
+    <line x1="7" y1="7" x2="17" y2="7"/><line x1="7" y1="11" x2="17" y2="11"/>
+    <line x1="7" y1="15" x2="13" y2="15"/>
+  </symbol>
+  <symbol id="bf-pedido" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="4" y="2" width="14" height="20" rx="2"/>
+    <path d="M9 2v2h6V2"/><line x1="8" y1="10" x2="16" y2="10"/>
+    <polyline points="8 14 10 16 14 12"/>
+  </symbol>
+  <symbol id="bf-estoque" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="21 8 21 21 3 21 3 8"/>
+    <rect x="1" y="3" width="22" height="5" rx="1"/>
+    <line x1="10" y1="12" x2="14" y2="12"/>
+  </symbol>
+  <symbol id="bf-entrega" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="1" y="3" width="15" height="13" rx="1"/>
+    <path d="M16 8h4l3 5v5h-7V8z"/>
+    <circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>
+  </symbol>
+  <symbol id="bf-pagamento" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="2" y="5" width="20" height="14" rx="2"/>
+    <circle cx="12" cy="12" r="3"/><line x1="2" y1="9" x2="22" y2="9"/>
+  </symbol>
+  <symbol id="bf-usuario" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="8" r="4"/>
+    <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+  </symbol>
+  <symbol id="bf-premio" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M8 21h8M12 17v4"/>
+    <path d="M7 4H5a1 1 0 0 0-1 1v2a4 4 0 0 0 4 4h1"/>
+    <path d="M17 4h2a1 1 0 0 1 1 1v2a4 4 0 0 1-4 4h-1"/>
+    <rect x="7" y="2" width="10" height="12" rx="2"/>
+  </symbol>
+  <symbol id="bf-estrela" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+  </symbol>
+  <symbol id="bf-configuracao" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="3"/>
+    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+  </symbol>
+  <symbol id="bf-busca" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+  </symbol>
+  <symbol id="bf-filtro" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+  </symbol>
+  <symbol id="bf-alerta" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+    <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+  </symbol>
+  <symbol id="bf-sucesso" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="10"/><polyline points="9 12 11 14 15 10"/>
+  </symbol>
+</svg>
+
+<!-- ── Hero ── -->
+<header class="hero">
+  <div class="hero-logo">
+    <span class="beer-emoji">🍺</span>
+    <h1>Beer<span>Fácil</span> Icons</h1>
+  </div>
+  <p class="hero-sub">Biblioteca de ícones SVG para o projeto Beer Fácil. Hospedada no Cloudflare — ícones novos chegam automaticamente.</p>
+  <span class="badge-version">v1.0.0 · 24 ícones</span>
+</header>
+
+<div class="install-section">
+  <div class="install-box">
+    <div class="install-box-label">Incluir no projeto — só esta linha, nunca mais mexer</div>
+    <code class="install-code">&lt;link rel="stylesheet" href="https://SEU_DOMINIO.pages.dev/icons/bf-icons.css"&gt;</code>
+  </div>
+</div>
+
+<!-- ── Main ── -->
+<main class="container">
+
+  <!-- Exemplos de uso -->
+  <div class="section-title">Exemplos de uso</div>
+  <div class="usage-demo">
+    <div class="usage-row">
+      <code class="usage-label">&lt;i class="bf bf-cerveja"&gt;&lt;/i&gt;</code>
+      <i class="bf bf-cerveja bf-lg" style="--bf-icon-color:#e8e8e8"></i>
+      <span style="color:#9a8a7a; font-size:.85rem">Tamanho padrão (1em)</span>
+    </div>
+    <div class="usage-row">
+      <code class="usage-label">&lt;i class="bf bf-chopp bf-xl bf-primary"&gt;&lt;/i&gt;</code>
+      <i class="bf bf-chopp bf-xl bf-primary"></i>
+      <span style="color:#9a8a7a; font-size:.85rem">bf-xl + cor primária</span>
+    </div>
+    <div class="usage-row">
+      <code class="usage-label">&lt;i class="bf bf-barril bf-3x bf-primary"&gt;&lt;/i&gt;</code>
+      <i class="bf bf-barril bf-3x bf-primary"></i>
+      <span style="color:#9a8a7a; font-size:.85rem">bf-3x grande</span>
+    </div>
+    <div class="usage-row">
+      <code class="usage-label">Cores: bf-success / bf-danger / bf-info</code>
+      <i class="bf bf-sucesso bf-lg bf-success"></i>
+      <i class="bf bf-alerta bf-lg bf-danger"></i>
+      <i class="bf bf-busca bf-lg bf-info"></i>
+    </div>
+    <div class="usage-row">
+      <code class="usage-label">Em botão: inline com texto</code>
+      <button style="display:inline-flex;align-items:center;gap:.4em;background:#F5A623;color:#1a0a00;border:none;border-radius:6px;padding:.5rem 1rem;font-weight:600;font-size:.9rem;cursor:pointer">
+        <i class="bf bf-pedido"></i> Novo Pedido
+      </button>
+    </div>
+  </div>
+
+  <!-- Bebidas -->
+  <div class="section-title">Bebidas</div>
+  <div class="icon-grid" id="grid-bebidas">
+    <div class="icon-card" onclick="copy('bf-cerveja')">
+      <i class="bf bf-cerveja bf-xl" style="--bf-icon-color:#F5A623"></i>
+      <span class="icon-name">bf-cerveja</span>
+    </div>
+    <div class="icon-card" onclick="copy('bf-chopp')">
+      <i class="bf bf-chopp bf-xl" style="--bf-icon-color:#F5A623"></i>
+      <span class="icon-name">bf-chopp</span>
+    </div>
+    <div class="icon-card" onclick="copy('bf-garrafa')">
+      <i class="bf bf-garrafa bf-xl" style="--bf-icon-color:#F5A623"></i>
+      <span class="icon-name">bf-garrafa</span>
+    </div>
+    <div class="icon-card" onclick="copy('bf-barril')">
+      <i class="bf bf-barril bf-xl" style="--bf-icon-color:#F5A623"></i>
+      <span class="icon-name">bf-barril</span>
+    </div>
+    <div class="icon-card" onclick="copy('bf-lata')">
+      <i class="bf bf-lata bf-xl" style="--bf-icon-color:#F5A623"></i>
+      <span class="icon-name">bf-lata</span>
+    </div>
+    <div class="icon-card" onclick="copy('bf-copo')">
+      <i class="bf bf-copo bf-xl" style="--bf-icon-color:#F5A623"></i>
+      <span class="icon-name">bf-copo</span>
+    </div>
+    <div class="icon-card" onclick="copy('bf-espuma')">
+      <i class="bf bf-espuma bf-xl" style="--bf-icon-color:#F5A623"></i>
+      <span class="icon-name">bf-espuma</span>
+    </div>
+    <div class="icon-card" onclick="copy('bf-lupulo')">
+      <i class="bf bf-lupulo bf-xl" style="--bf-icon-color:#F5A623"></i>
+      <span class="icon-name">bf-lupulo</span>
+    </div>
+    <div class="icon-card" onclick="copy('bf-cevada')">
+      <i class="bf bf-cevada bf-xl" style="--bf-icon-color:#F5A623"></i>
+      <span class="icon-name">bf-cevada</span>
+    </div>
+    <div class="icon-card" onclick="copy('bf-torneira')">
+      <i class="bf bf-torneira bf-xl" style="--bf-icon-color:#F5A623"></i>
+      <span class="icon-name">bf-torneira</span>
+    </div>
+  </div>
+
+  <!-- Estabelecimento -->
+  <div class="section-title">Estabelecimento</div>
+  <div class="icon-grid">
+    <div class="icon-card" onclick="copy('bf-mesa')">
+      <i class="bf bf-mesa bf-xl" style="--bf-icon-color:#e8e8e8"></i>
+      <span class="icon-name">bf-mesa</span>
+    </div>
+    <div class="icon-card" onclick="copy('bf-cardapio')">
+      <i class="bf bf-cardapio bf-xl" style="--bf-icon-color:#e8e8e8"></i>
+      <span class="icon-name">bf-cardapio</span>
+    </div>
+    <div class="icon-card" onclick="copy('bf-pedido')">
+      <i class="bf bf-pedido bf-xl" style="--bf-icon-color:#e8e8e8"></i>
+      <span class="icon-name">bf-pedido</span>
+    </div>
+    <div class="icon-card" onclick="copy('bf-estoque')">
+      <i class="bf bf-estoque bf-xl" style="--bf-icon-color:#e8e8e8"></i>
+      <span class="icon-name">bf-estoque</span>
+    </div>
+    <div class="icon-card" onclick="copy('bf-entrega')">
+      <i class="bf bf-entrega bf-xl" style="--bf-icon-color:#e8e8e8"></i>
+      <span class="icon-name">bf-entrega</span>
+    </div>
+    <div class="icon-card" onclick="copy('bf-pagamento')">
+      <i class="bf bf-pagamento bf-xl" style="--bf-icon-color:#e8e8e8"></i>
+      <span class="icon-name">bf-pagamento</span>
+    </div>
+  </div>
+
+  <!-- Sistema -->
+  <div class="section-title">Sistema</div>
+  <div class="icon-grid">
+    <div class="icon-card" onclick="copy('bf-usuario')">
+      <i class="bf bf-usuario bf-xl" style="--bf-icon-color:#e8e8e8"></i>
+      <span class="icon-name">bf-usuario</span>
+    </div>
+    <div class="icon-card" onclick="copy('bf-premio')">
+      <i class="bf bf-premio bf-xl" style="--bf-icon-color:#e8e8e8"></i>
+      <span class="icon-name">bf-premio</span>
+    </div>
+    <div class="icon-card" onclick="copy('bf-estrela')">
+      <i class="bf bf-estrela bf-xl" style="--bf-icon-color:#e8e8e8"></i>
+      <span class="icon-name">bf-estrela</span>
+    </div>
+    <div class="icon-card" onclick="copy('bf-configuracao')">
+      <i class="bf bf-configuracao bf-xl" style="--bf-icon-color:#e8e8e8"></i>
+      <span class="icon-name">bf-configuracao</span>
+    </div>
+    <div class="icon-card" onclick="copy('bf-busca')">
+      <i class="bf bf-busca bf-xl" style="--bf-icon-color:#e8e8e8"></i>
+      <span class="icon-name">bf-busca</span>
+    </div>
+    <div class="icon-card" onclick="copy('bf-filtro')">
+      <i class="bf bf-filtro bf-xl" style="--bf-icon-color:#e8e8e8"></i>
+      <span class="icon-name">bf-filtro</span>
+    </div>
+    <div class="icon-card" onclick="copy('bf-alerta')">
+      <i class="bf bf-alerta bf-xl" style="--bf-icon-color:#ffc107"></i>
+      <span class="icon-name">bf-alerta</span>
+    </div>
+    <div class="icon-card" onclick="copy('bf-sucesso')">
+      <i class="bf bf-sucesso bf-xl" style="--bf-icon-color:#198754"></i>
+      <span class="icon-name">bf-sucesso</span>
+    </div>
+  </div>
+
+</main>
+
+<div class="toast" id="toast">✓ Classe copiada!</div>
+
+<script>
+function copy(name) {
+  const html = `<i class="bf ${name}"></i>`;
+  navigator.clipboard.writeText(html).then(() => {
+    const t = document.getElementById("toast");
+    t.textContent = `✓  ${name}  copiado!`;
+    t.classList.add("show");
+    setTimeout(() => t.classList.remove("show"), 1800);
+  });
+}
+</script>
+</body>
+</html>
